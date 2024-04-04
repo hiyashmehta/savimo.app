@@ -151,6 +151,8 @@ model Transaction {
     user            User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     type            String
 
+    transactionDate DateTime
+
     @@index([paymentMethodId])
     @@index([userId])
 }
