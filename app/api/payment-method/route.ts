@@ -11,7 +11,7 @@ export async function GET(req: Request) {
 	}
 
 	try {
-		// create a payment method here
+		// get all payment methods for the user
 		const method = await prisma.paymentMethod.findMany({
 			where: {
 				userId: session.user.id,
@@ -43,6 +43,44 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: "Internal Server Error" });
 	}
 }
-export function PUT() {}
-export function DELETE() {}
-export function PATCH() {}
+export async function PUT(req: Request) {
+	// write the put request to update a payment method here
+	const session = await getSession();
+
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" });
+	}
+	try {
+		const { paymentMethodId, paymentMethodName } = await req.json();
+		// create a payment method here
+		const method = await prisma.paymentMethod.update({
+			where: {
+				id: paymentMethodId,
+			},
+			data: {
+				name: paymentMethodName,
+			},
+		});
+		return NextResponse.json({ result: method, status: "success" });
+	} catch (error) {
+		return NextResponse.json({ error: "Internal Server Error" });
+	}
+}
+export async function DELETE(req: Request) {
+	const session = await getSession();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" });
+	}
+	try {
+		const { paymentMethodId } = await req.json();
+		// create a payment method here
+		const method = await prisma.paymentMethod.delete({
+			where: {
+				id: paymentMethodId,
+			},
+		});
+		return NextResponse.json({ result: method, status: "success" });
+	} catch (error) {
+		return NextResponse.json({ error: "Internal Server Error" });
+	}
+}

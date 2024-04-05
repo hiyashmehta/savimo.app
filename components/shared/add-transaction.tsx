@@ -26,7 +26,7 @@ import {
 } from "../ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -185,22 +185,56 @@ export default function AddTransaction() {
 												</FormControl>
 											</PopoverTrigger>
 											<PopoverContent
-												className="w-auto p-0"
+												className="flex w-auto flex-col space-y-2 p-2"
 												align="start"
 											>
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													disabled={(date: Date) =>
-														date > new Date() ||
-														date <
-															new Date(
-																"1900-01-01",
-															)
+												<Select
+													onValueChange={(value) =>
+														field.onChange(
+															addDays(
+																new Date(),
+																parseInt(value),
+															),
+														)
 													}
-													initialFocus
-												/>
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select" />
+													</SelectTrigger>
+													<SelectContent position="popper">
+														<SelectItem value="0">
+															Today
+														</SelectItem>
+														<SelectItem value="1">
+															Tomorrow
+														</SelectItem>
+														<SelectItem value="3">
+															In 3 days
+														</SelectItem>
+														<SelectItem value="7">
+															In a week
+														</SelectItem>
+													</SelectContent>
+												</Select>{" "}
+												<div className="rounded-md border">
+													<Calendar
+														mode="single"
+														selected={field.value}
+														onSelect={
+															field.onChange
+														}
+														disabled={(
+															date: Date,
+														) =>
+															date > new Date() ||
+															date <
+																new Date(
+																	"1900-01-01",
+																)
+														}
+														initialFocus
+													/>
+												</div>
 											</PopoverContent>
 										</Popover>
 										<FormDescription>

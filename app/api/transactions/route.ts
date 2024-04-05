@@ -59,6 +59,59 @@ export async function POST(req: Request) {
 		});
 	}
 }
-export function PUT() {}
-export function DELETE() {}
-export function PATCH() {}
+export async function PUT(req: Request) {
+	// write the put request to update a transaction here
+	const session = await getSession();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" });
+	}
+	try {
+		const {
+			transactionId,
+			amount,
+			date,
+			description,
+			paymentMethod,
+			title,
+			type,
+		} = await req.json();
+		// update a payment method here
+		const result = await prisma.transaction.update({
+			where: {
+				id: transactionId,
+			},
+			data: {
+				amount,
+				currency: "INR",
+				description,
+				title,
+				type,
+				paymentMethodId: paymentMethod,
+				transactionDate: date,
+			},
+		});
+		return NextResponse.json({ result: result, status: "success" });
+	} catch (error) {
+		console.error(error);
+		return NextResponse.json({ error: "Internal Server Error" });
+	}
+}
+export async function DELETE(req: Request) {
+	const session = await getSession();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" });
+	}
+	try {
+		const { transactionId } = await req.json();
+		// create a payment method here
+		const result = await prisma.transaction.delete({
+			where: {
+				id: transactionId,
+			},
+		});
+		return NextResponse.json({ result: result, status: "success" });
+	} catch (error) {
+		console.error(error);
+		return NextResponse.json({ error: "Internal Server Error" });
+	}
+}
