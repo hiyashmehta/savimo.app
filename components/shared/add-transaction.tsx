@@ -24,6 +24,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "../ui/calendar";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createTransaction, getTransactions } from "@/lib/actions/transactions";
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
+import { getPaymentMethods } from "@/lib/actions/payment-method";
 const FormSchema = z.object({
 	title: z.string().min(3, {
 		message: "Payment method name must be at least 3 characters long",
@@ -53,192 +62,248 @@ export default function AddTransaction() {
 		},
 	});
 
-	const [paymentMethods, setPaymentMethods] = React.useState([]);
-	const handleFetchPaymentMethods = () => {
-		fetch("/api/payment-method")
-			.then((res) => res.json())
-			.then((json) => {
-				console.log(json);
-				if (json.status === "success") {
-					setPaymentMethods(json.result);
-				}
-			})
-			.catch((err) => console.log(err));
-	};
-	useEffect(() => {
-		handleFetchPaymentMethods();
-	}, [open]);
-	function onSubmit(data: z.infer<typeof FormSchema>) {
-		// toast({
-		// 	title: "You submitted the following values:",
-		// 	description: (
-		// 		<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-		// 			<code className="text-white">
-		// 				{JSON.stringify(data, null, 2)}
-		// 			</code>
-		// 		</pre>
-		// 	),
-		// });
-		fetch("/api/transactions", {
-			method: "POST",
-			body: JSON.stringify(data),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				console.log(data);
-				toast.success("Payment method added successfully");
-				form.reset();
-			})
-			.catch((err) => console.log(err));
-	}
-	return (
-		<Dialog open={open} onOpenChange={() => setOpen(!open)}>
-			<Button onClick={() => setOpen(true)}>Add Transaction</Button>
-			<DialogContent>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(onSubmit)}
-						className="w-full space-y-6"
-					>
-						<FormField
-							control={form.control}
-							name="title"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Title</FormLabel>
-									<FormControl>
-										<Input placeholder="Title" {...field} />
-									</FormControl>
-									<FormDescription>
-										This is the title of transaction
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="amount"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Amount</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="0"
-											type="number"
-											value={Number(field.value)}
-											onChange={(event) =>
-												field.onChange(
-													Number(event.target.value),
-												)
-											}
+	const user = useCurrentUser();
+	const { data: paymentMethods, isLoading } = useQuery({
+		queryKey: ["payment-methods"],
+		queryFn: () =>
+			getPaymentMethods() as Promise<{ id: string; name: string }[]>,
+		enabled: !!user?.id,
+	});
+	const queryClient = useQueryClient();
 
-											// onChange={field.onChange}
-											// {...field}
-										/>
-									</FormControl>
-									<FormDescription>
-										This is the amount of your transaction.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="paymentMethod"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Payment Method</FormLabel>
-									<FormControl>
+	const { mutate, isPending } = useMutation({
+		mutationFn: createTransaction,
+		onSuccess: () => {
+			toast.success("Payment method added successfully");
+			form.reset();
+			queryClient.invalidateQueries({ queryKey: ["transactions"] });
+		},
+	});
+
+	function onSubmit(data: z.infer<typeof FormSchema>) {
+		mutate({ data });
+	}
+	if (isLoading) return <div>Loading...</div>;
+	if (paymentMethods)
+		return (
+			<Dialog open={open} onOpenChange={() => setOpen(!open)}>
+				<Button onClick={() => setOpen(true)}>Add Transaction</Button>
+				<DialogContent>
+					<h1 className="text-xl font-medium">
+						Add Transaction
+						{isPending && (
+							<span className="text-muted-foreground">
+								{" "}
+								- Saving...
+							</span>
+						)}
+					</h1>
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="w-full space-y-6"
+						>
+							<FormField
+								control={form.control}
+								name="title"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Title</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Title"
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											This is the title of transaction
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="amount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Amount</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="0"
+												type="number"
+												value={Number(field.value)}
+												onChange={(event) =>
+													field.onChange(
+														Number(
+															event.target.value,
+														),
+													)
+												}
+
+												// onChange={field.onChange}
+												// {...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											This is the amount of your
+											transaction.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="date"
+								render={({ field }) => (
+									<FormItem className="flex flex-col">
+										<FormLabel>Transaction Date</FormLabel>
+										<Popover>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button
+														variant={"outline"}
+														className={cn(
+															"w-[240px] pl-3 text-left font-normal",
+															!field.value &&
+																"text-muted-foreground",
+														)}
+													>
+														{field.value ? (
+															format(
+																field.value,
+																"PPP",
+															)
+														) : (
+															<span>
+																Pick a date
+															</span>
+														)}
+														<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+											<PopoverContent
+												className="w-auto p-0"
+												align="start"
+											>
+												<Calendar
+													mode="single"
+													selected={field.value}
+													onSelect={field.onChange}
+													disabled={(date: Date) =>
+														date > new Date() ||
+														date <
+															new Date(
+																"1900-01-01",
+															)
+													}
+													initialFocus
+												/>
+											</PopoverContent>
+										</Popover>
+										<FormDescription>
+											This is the date of the transaction.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="paymentMethod"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Payment Method</FormLabel>
+										<FormControl>
+											<Select
+												onValueChange={field.onChange}
+												// defaultValue={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select the payment method" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{paymentMethods.map(
+														(item: any) => (
+															<SelectItem
+																value={item?.id}
+																key={item?.id}
+															>
+																{item?.name}
+															</SelectItem>
+														),
+													)}
+												</SelectContent>
+											</Select>
+										</FormControl>
+										<FormDescription>
+											This is the name of your payment
+											method.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Description"
+												{...field}
+											/>
+										</FormControl>
+										<FormDescription>
+											This is the description of your
+											transaction.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="type"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Transaction Type</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Select the payment method" />
+													<SelectValue placeholder="Select the transaction type" />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{paymentMethods.map(
-													(item: any) => (
-														<SelectItem
-															value={item?.id}
-															key={item?.id}
-														>
-															{item?.name}
-														</SelectItem>
-													),
-												)}
+												<SelectItem value="expense">
+													Expense
+												</SelectItem>
+												<SelectItem value="income">
+													Income
+												</SelectItem>
 											</SelectContent>
 										</Select>
-									</FormControl>
-									<FormDescription>
-										This is the name of your payment method.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="description"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Description</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Payment Method"
-											{...field}
-										/>
-									</FormControl>
-									<FormDescription>
-										This is the description of your
-										transaction.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="type"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Email</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select the transaction type" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="expense">
-												Expense
-											</SelectItem>
-											<SelectItem value="income">
-												Income
-											</SelectItem>
-										</SelectContent>
-									</Select>
-									<FormDescription>
-										This is the type of your transaction.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<Button type="submit">Save</Button>
-					</form>
-				</Form>
-			</DialogContent>
-		</Dialog>
-	);
+										<FormDescription>
+											This is the type of your
+											transaction.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<Button type="submit">Save</Button>
+						</form>
+					</Form>
+				</DialogContent>
+			</Dialog>
+		);
 }

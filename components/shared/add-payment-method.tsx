@@ -60,7 +60,7 @@ export default function AddPaymentMethod() {
 	}
 	return (
 		<Dialog open={open} onOpenChange={() => setOpen(!open)}>
-			<Button onClick={() => setOpen(true)}>Add Payment Method</Button>
+			<Button onClick={() => setOpen(true)} variant={'outline'}>Add Payment Method</Button>
 			<DialogContent>
 				<Form {...form}>
 					<form

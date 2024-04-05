@@ -9,14 +9,22 @@ export async function GET() {
 	}
 
 	try {
-		// create a payment method here
-		const method = await prisma.transaction.findMany({
+		// get the list of transactions and return it, also, update the paymentMethodName for each transaction by joining the paymentMethod table
+		// using the paymentMethodId
+		const list = await prisma.transaction.findMany({
 			where: {
 				userId: session.user.id,
 			},
+			include: {
+				paymentMethod: true,
+			},
+			orderBy: {
+				transactionDate: "asc",
+			},
 		});
-		return NextResponse.json({ result: method, status: "success" });
+		return NextResponse.json({ result: list, status: "success" });
 	} catch (error) {
+		console.error(error);
 		return NextResponse.json({ error: "Internal Server Error" });
 	}
 }
@@ -43,6 +51,8 @@ export async function POST(req: Request) {
 		});
 		return NextResponse.json({ result: result, status: "success" });
 	} catch (error) {
+		console.error(error);
+
 		return NextResponse.json({
 			error: "Internal Server Error",
 			details: error,

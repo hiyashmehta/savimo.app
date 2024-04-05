@@ -7,36 +7,61 @@ import { LineChartHero } from "@/components/charts/line-chart";
 import { SparkAreaUsageExample } from "@/components/charts/spark-chart";
 import AddPaymentMethod from "@/components/shared/add-payment-method";
 import AddTransaction from "@/components/shared/add-transaction";
+import {
+	Transaction,
+	TransactionTable,
+} from "@/components/shared/tables/transaction-table";
 import { Button } from "@/components/ui/button";
+import { getTransactions } from "@/lib/actions/transactions";
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
+import { useQuery } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import React from "react";
 
 export default function AppPage() {
-	const { data } = useSession();
+	const user = useCurrentUser();
+	const {
+		data: transactions,
+		isLoading,
+		error,
+		refetch,
+	} = useQuery({
+		queryKey: ["transactions"],
+		queryFn: () => getTransactions() as Promise<Transaction[]>,
+		enabled: !!user?.email,
+	});
 
-	if (data)
+	console.log({ transactions });
+	if (isLoading) return <div>Loading...</div>;
+	if (transactions)
 		return (
 			<div>
-				AppPage
-				<Button onClick={() => signOut()}>Sign out</Button>
-				<h1>Welcome {data?.user?.name}</h1>
-				<p>Your email is {data?.user?.email}</p>
-				<Image
-					src={data?.user?.image ?? "/profile.png"}
-					alt="Profile picture"
-					width={100}
-					height={100}
-					unoptimized
-				/>
-				<AddPaymentMethod />
-				<AddTransaction />
-				<AreaChartHero />
+				<div className="flex justify-between p-4">
+					<h1>Welcome {user?.name}</h1>
+					<p>Your email is {user?.email}</p>
+					<Image
+						src={user?.image ?? "/profile.png"}
+						alt="Profile picture"
+						width={100}
+						height={100}
+						unoptimized
+						className="rounded-full h-10 w-10"
+					/>
+					<Button onClick={() => signOut()}>Sign out</Button>
+					<AddPaymentMethod />
+					<AddTransaction />
+				</div>
+				<div className="p-4">
+					<AreaChartHero data={transactions} />
+					<TransactionTable data={transactions} />
+				</div>
+				{/* <AreaChartHero />
 				<BarChartHero />
 				<BarListHero />
 				<DonutChartUsageExample />
 				<LineChartHero />
-				<SparkAreaUsageExample />
+				<SparkAreaUsageExample /> */}
 			</div>
 		);
 }
