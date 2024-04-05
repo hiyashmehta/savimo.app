@@ -54,6 +54,8 @@ export default function AppPage() {
 				</div>
 				<div className="p-4">
 					<AreaChartHero data={transactions} />
+					<BarChartHero data={transactions} />
+					<LineChartHero data={transactions} />
 					<TransactionTable data={transactions} />
 				</div>
 				{/* <AreaChartHero />
