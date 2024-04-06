@@ -31,6 +31,29 @@ export default function AppPage() {
 		queryFn: () => getTransactions() as Promise<Transaction[]>,
 		enabled: !!user?.email,
 	});
+	const [filteredTransactions, setFilteredTransactions] = React.useState<
+		Transaction[]
+	>([]);
+	React.useEffect(() => {
+		if (transactions) {
+			setFilteredTransactions(transactions);
+			filterTransactions();
+		}
+	}, [transactions]);
+
+	const filterTransactions = () => {
+		// filter transactions here
+
+		// select the time period to filter
+
+		const filtered =
+			transactions &&
+			transactions.filter((transaction) => {
+				// filter the transactions here
+				if (transaction.amount < 1000) return transaction;
+			});
+		setFilteredTransactions(filtered as Transaction[]);
+	};
 
 	console.log({ transactions });
 	if (isLoading) return <div>Loading...</div>;
@@ -53,9 +76,9 @@ export default function AppPage() {
 					<AddTransaction />
 				</div>
 				<div className="p-4">
-					<AreaChartHero data={transactions} />
-					<BarChartHero data={transactions} />
-					<LineChartHero data={transactions} />
+					<AreaChartHero data={filteredTransactions} />
+					<BarChartHero data={filteredTransactions} />
+					<LineChartHero data={filteredTransactions} />
 					<TransactionTable data={transactions} />
 				</div>
 				{/* <AreaChartHero />

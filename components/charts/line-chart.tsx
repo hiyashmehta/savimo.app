@@ -66,7 +66,7 @@ const chartdata = [
 ];
 
 const dataFormatter = (number: number) =>
-	`$${Intl.NumberFormat("en-in").format(number).toString()}`;
+	`${Intl.NumberFormat("en-in").format(number).toString()}`;
 
 export function LineChartHero({ data }: { data: Transaction[] }) {
 	// const
@@ -99,8 +99,8 @@ export function LineChartHero({ data }: { data: Transaction[] }) {
 			className="h-80"
 			data={mergedData}
 			index="date"
-			categories={["expense", "income"]}
-			colors={["indigo", "rose"]}
+			categories={["income"]}
+			colors={["indigo"]}
 			valueFormatter={dataFormatter}
 			yAxisWidth={60}
 			onValueChange={(v) => console.log(v)}

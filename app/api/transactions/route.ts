@@ -66,19 +66,12 @@ export async function PUT(req: Request) {
 		return NextResponse.json({ error: "Unauthorized" });
 	}
 	try {
-		const {
-			transactionId,
-			amount,
-			date,
-			description,
-			paymentMethod,
-			title,
-			type,
-		} = await req.json();
+		const { amount, date, description, paymentMethodId, title, type, id } =
+			await req.json();
 		// update a payment method here
 		const result = await prisma.transaction.update({
 			where: {
-				id: transactionId,
+				id: id,
 			},
 			data: {
 				amount,
@@ -86,7 +79,7 @@ export async function PUT(req: Request) {
 				description,
 				title,
 				type,
-				paymentMethodId: paymentMethod,
+				paymentMethodId: paymentMethodId,
 				transactionDate: date,
 			},
 		});
@@ -102,11 +95,11 @@ export async function DELETE(req: Request) {
 		return NextResponse.json({ error: "Unauthorized" });
 	}
 	try {
-		const { transactionId } = await req.json();
+		const { id } = await req.json();
 		// create a payment method here
 		const result = await prisma.transaction.delete({
 			where: {
-				id: transactionId,
+				id: id,
 			},
 		});
 		return NextResponse.json({ result: result, status: "success" });

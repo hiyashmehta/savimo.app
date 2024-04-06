@@ -36,3 +36,44 @@ export function getTransactions() {
 			});
 	});
 }
+
+export function updateTransaction({ data }: { data: any }) {
+	return new Promise((resolve, reject) => {
+		fetch("/api/transactions", {
+			method: "PUT",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				// console.log(data);
+				resolve(data);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject(err);
+			});
+	});
+}
+export function deleteTransaction({ data }: { data: any }) {
+	return new Promise((resolve, reject) => {
+		fetch("/api/transactions", {
+			method: "DELETE",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				// console.log(data);
+				resolve(data);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject(err);
+			});
+	});
+}

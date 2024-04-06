@@ -30,9 +30,14 @@ import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTransaction, getTransactions } from "@/lib/actions/transactions";
+import {
+	createTransaction,
+	getTransactions,
+	updateTransaction,
+} from "@/lib/actions/transactions";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { getPaymentMethods } from "@/lib/actions/payment-method";
+import { Transaction } from "./tables/transaction-table";
 const FormSchema = z.object({
 	title: z.string().min(3, {
 		message: "Payment method name must be at least 3 characters long",
@@ -48,8 +53,19 @@ const FormSchema = z.object({
 	type: z.enum(["expense", "income"]),
 });
 
-export default function AddTransaction() {
+export default function UpdateTransactionDialog({ id }: { id: string }) {
 	const [open, setOpen] = React.useState(false);
+	const user = useCurrentUser();
+
+	const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
+		queryKey: ["transactions"],
+		queryFn: () => getTransactions() as Promise<Transaction[]>,
+		enabled: !!user?.id,
+	});
+
+	const transaction = transactions?.find(
+		(transaction) => transaction.id === id,
+	);
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -60,9 +76,16 @@ export default function AddTransaction() {
 			description: "",
 			type: "expense",
 		},
+		values: {
+			title: transaction?.title as string,
+			amount: transaction?.amount as number,
+			paymentMethodId: transaction?.paymentMethodId as string,
+			date: transaction?.date as Date,
+			description: transaction?.description as string,
+			type: transaction?.type as "expense" | "income",
+		},
 	});
 
-	const user = useCurrentUser();
 	const { data: paymentMethods, isLoading } = useQuery({
 		queryKey: ["payment-methods"],
 		queryFn: () =>
@@ -72,7 +95,7 @@ export default function AddTransaction() {
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
-		mutationFn: createTransaction,
+		mutationFn: updateTransaction,
 		onSuccess: () => {
 			toast.success("Payment method added successfully");
 			form.resetField("title");
@@ -84,16 +107,22 @@ export default function AddTransaction() {
 	});
 
 	function onSubmit(data: z.infer<typeof FormSchema>) {
-		mutate({ data });
+		const item = {
+			...data,
+			id: transaction?.id as string,
+		};
+		mutate({ data: item });
 	}
 	if (isLoading) return <div>Loading...</div>;
 	if (paymentMethods)
 		return (
 			<Dialog open={open} onOpenChange={() => setOpen(!open)}>
-				<Button onClick={() => setOpen(true)}>Add Transaction</Button>
+				<Button onClick={() => setOpen(true)}>
+					Update Transaction
+				</Button>
 				<DialogContent>
 					<h1 className="text-xl font-medium">
-						Add Transaction
+						Update Transaction
 						{isPending && (
 							<span className="text-muted-foreground">
 								{" "}
