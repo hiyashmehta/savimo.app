@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
-import { Dialog, DialogContent } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { Dialog, DialogContent } from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
 import {
 	Form,
 	FormControl,
@@ -10,8 +10,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../../ui/form";
+import { Input } from "../../../ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -23,12 +23,12 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "../../../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "../ui/calendar";
+import { Calendar } from "../../../ui/calendar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createTransaction,
@@ -38,7 +38,7 @@ import {
 } from "@/lib/actions/transactions";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { getPaymentMethods } from "@/lib/actions/payment-method";
-import { Transaction } from "./tables/transaction-table";
+import { Transaction } from "../../tables/transaction-table";
 const FormSchema = z.object({
 	title: z.string().min(3, {
 		message: "Payment method name must be at least 3 characters long",

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { Dialog, DialogContent } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { Dialog, DialogContent } from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
 import {
 	Form,
 	FormControl,
@@ -10,8 +10,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../../ui/form";
+import { Input } from "../../../ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,7 +60,9 @@ export default function AddPaymentMethod() {
 	}
 	return (
 		<Dialog open={open} onOpenChange={() => setOpen(!open)}>
-			<Button onClick={() => setOpen(true)} variant={'outline'}>Add Payment Method</Button>
+			<Button onClick={() => setOpen(true)} variant={"outline"}>
+				Add Payment Method
+			</Button>
 			<DialogContent>
 				<Form {...form}>
 					<form

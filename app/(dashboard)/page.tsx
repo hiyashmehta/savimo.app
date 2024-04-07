@@ -5,8 +5,8 @@ import { BarListHero } from "@/components/charts/bar-list";
 import { DonutChartUsageExample } from "@/components/charts/donut-chart";
 import { LineChartHero } from "@/components/charts/line-chart";
 import { SparkAreaUsageExample } from "@/components/charts/spark-chart";
-import AddPaymentMethod from "@/components/shared/add-payment-method";
-import AddTransaction from "@/components/shared/add-transaction";
+import AddPaymentMethod from "@/components/shared/dialogs/payment-method/add-payment-method";
+import AddTransaction from "@/components/shared/dialogs/transactions/add-transaction";
 import {
 	Transaction,
 	TransactionTable,

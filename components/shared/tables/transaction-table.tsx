@@ -35,8 +35,8 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import UpdateTransactionDialog from "../update-transaction-dialog";
-import DeleteTransactionDialog from "../delete-transaction-dialog";
+import UpdateTransactionDialog from "../dialogs/transactions/update-transaction-dialog";
+import DeleteTransactionDialog from "../dialogs/transactions/delete-transaction-dialog";
 
 export type Transaction = {
 	id: string;
