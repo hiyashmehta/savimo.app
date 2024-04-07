@@ -13,6 +13,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 	if (status === "authenticated") {
 		redirect("/app");
 	}
+
+
+
+	
 	if (status === "unauthenticated")
 		return (
 			<div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8">
