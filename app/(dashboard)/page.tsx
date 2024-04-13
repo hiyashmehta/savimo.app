@@ -73,9 +73,16 @@ export default function AppPage() {
                     <AddTransaction />
                 </div>
                 <div className="p-4">
-                    <AreaChartHero data={filteredTransactions} />
-                    <BarChartHero data={filteredTransactions} />
-                    <LineChartHero data={filteredTransactions} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <AreaChartHero data={filteredTransactions} />
+                        <BarChartHero
+                            data={filteredTransactions.slice(0, 20)}
+                        />
+                        <LineChartHero data={filteredTransactions} />
+                        <LineChartHero
+                            data={filteredTransactions.slice(0, 60)}
+                        />
+                    </div>
                     <TransactionTable data={transactions} />
                 </div>
                 {/* <AreaChartHero />
