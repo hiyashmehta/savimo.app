@@ -29,7 +29,7 @@ export default async function PostOG() {
                     </div> */}
                     <img
                         tw="mt-4 w-5/6 rounded-2xl border border-gray-200 shadow-md"
-                        src={"http://localhost:3000/app-preview.png"}
+                        src={"https://savimo.app/app-preview.png"}
                         alt={"App Preview Image"}
                     />
                 </div>
