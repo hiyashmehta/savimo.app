@@ -13,14 +13,14 @@ export const metadata: Metadata = {
         title: "Expense Tracker | savimo.app",
         description:
             "Your personal finance tracker. Built with NextJS, TailwindCSS and MySQL. Track all your transactions in one place.",
-        // images: [
-        //     {
-        //         url: "/app-preview.png",
-        //         width: 1200,
-        //         height: 600,
-        //         alt: "App Preview Image",
-        //     },
-        // ],
+        images: [
+            {
+                url: "/og-image.png",
+                width: 1200,
+                height: 600,
+                alt: "App Preview Image",
+            },
+        ],
     },
 };
 
