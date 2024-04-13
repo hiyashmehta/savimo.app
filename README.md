@@ -34,4 +34,4 @@ Tech stack:
 -   date-fns for date manipulation and formatting
 
 Preview:
-![Preview](https://www.savimo.app/opengraph-image)
+![Preview](./public/og-image.png)
