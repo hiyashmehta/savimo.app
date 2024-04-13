@@ -15,7 +15,7 @@ export const metadata: Metadata = {
             "Your personal finance tracker. Built with NextJS, TailwindCSS and MySQL. Track all your transactions in one place.",
         images: [
             {
-                url: "/og-image.png",
+                url: "https://savimo.app/og-image.png",
                 width: 1200,
                 height: 600,
                 alt: "App Preview Image",
