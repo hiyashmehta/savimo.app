@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
-import { Dialog, DialogContent } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { Dialog, DialogContent } from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
 import {
 	Form,
 	FormControl,
@@ -10,8 +10,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../../ui/form";
+import { Input } from "../../../ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -23,16 +23,21 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "../../../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "../ui/calendar";
+import { Calendar } from "../../../ui/calendar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTransaction, getTransactions } from "@/lib/actions/transactions";
+import {
+	createTransaction,
+	getTransactions,
+	updateTransaction,
+} from "@/lib/actions/transactions";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { getPaymentMethods } from "@/lib/actions/payment-method";
+import { Transaction } from "../../tables/transaction-table";
 const FormSchema = z.object({
 	title: z.string().min(3, {
 		message: "Payment method name must be at least 3 characters long",
@@ -40,7 +45,7 @@ const FormSchema = z.object({
 	amount: z.number().positive({
 		message: "Amount must be a positive number",
 	}),
-	paymentMethod: z.string().min(3, {
+	paymentMethodId: z.string().min(3, {
 		message: "Payment method must be at least 3 characters long",
 	}),
 	date: z.date(),
@@ -48,21 +53,39 @@ const FormSchema = z.object({
 	type: z.enum(["expense", "income"]),
 });
 
-export default function AddTransaction() {
+export default function UpdateTransactionDialog({ id }: { id: string }) {
 	const [open, setOpen] = React.useState(false);
+	const user = useCurrentUser();
+
+	const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
+		queryKey: ["transactions"],
+		queryFn: () => getTransactions() as Promise<Transaction[]>,
+		enabled: !!user?.id,
+	});
+
+	const transaction = transactions?.find(
+		(transaction) => transaction.id === id,
+	);
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			title: "",
 			amount: 0,
-			paymentMethod: "",
-			date: new Date(),
+			paymentMethodId: "",
+			// date: new Date(),
 			description: "",
 			type: "expense",
 		},
+		values: {
+			title: transaction?.title as string,
+			amount: transaction?.amount as number,
+			paymentMethodId: transaction?.paymentMethodId as string,
+			date: transaction?.date as Date,
+			description: transaction?.description as string,
+			type: transaction?.type as "expense" | "income",
+		},
 	});
 
-	const user = useCurrentUser();
 	const { data: paymentMethods, isLoading } = useQuery({
 		queryKey: ["payment-methods"],
 		queryFn: () =>
@@ -72,25 +95,34 @@ export default function AddTransaction() {
 	const queryClient = useQueryClient();
 
 	const { mutate, isPending } = useMutation({
-		mutationFn: createTransaction,
+		mutationFn: updateTransaction,
 		onSuccess: () => {
 			toast.success("Payment method added successfully");
-			form.reset();
+			form.resetField("title");
+			form.resetField("amount");
+			form.resetField("description");
+
 			queryClient.invalidateQueries({ queryKey: ["transactions"] });
 		},
 	});
 
 	function onSubmit(data: z.infer<typeof FormSchema>) {
-		mutate({ data });
+		const item = {
+			...data,
+			id: transaction?.id as string,
+		};
+		mutate({ data: item });
 	}
 	if (isLoading) return <div>Loading...</div>;
 	if (paymentMethods)
 		return (
 			<Dialog open={open} onOpenChange={() => setOpen(!open)}>
-				<Button onClick={() => setOpen(true)}>Add Transaction</Button>
+				<Button onClick={() => setOpen(true)}>
+					Update Transaction
+				</Button>
 				<DialogContent>
 					<h1 className="text-xl font-medium">
-						Add Transaction
+						Update Transaction
 						{isPending && (
 							<span className="text-muted-foreground">
 								{" "}
@@ -185,22 +217,69 @@ export default function AddTransaction() {
 												</FormControl>
 											</PopoverTrigger>
 											<PopoverContent
-												className="w-auto p-0"
+												className="flex w-auto flex-col space-y-2 p-2"
 												align="start"
 											>
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													disabled={(date: Date) =>
-														date > new Date() ||
-														date <
-															new Date(
-																"1900-01-01",
-															)
+												{/* <Input
+													placeholder="DD/MM/YYYY"
+													type="date"
+													// value={field.value}
+													onChange={field.onChange}
+
+													// onChange={field.onChange}
+													// {...field}
+												/> */}
+												<Select
+													onValueChange={(value) =>
+														field.onChange(
+															addDays(
+																new Date(),
+																parseInt(value),
+															),
+														)
 													}
-													initialFocus
-												/>
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select" />
+													</SelectTrigger>
+													<SelectContent position="popper">
+														<SelectItem value="0">
+															Today
+														</SelectItem>
+														<SelectItem value="1">
+															Tomorrow
+														</SelectItem>
+														<SelectItem value="3">
+															In 3 days
+														</SelectItem>
+														<SelectItem value="7">
+															In a week
+														</SelectItem>
+													</SelectContent>
+												</Select>{" "}
+												<div className="rounded-md border">
+													<Calendar
+														mode="single"
+														selected={field.value}
+														onSelect={
+															field.onChange
+														}
+														// numberOfMonths={3}
+														defaultMonth={
+															field.value
+														}
+														disabled={(
+															date: Date,
+														) =>
+															date > new Date() ||
+															date <
+																new Date(
+																	"1900-01-01",
+																)
+														}
+														initialFocus
+													/>
+												</div>
 											</PopoverContent>
 										</Popover>
 										<FormDescription>
@@ -212,7 +291,7 @@ export default function AddTransaction() {
 							/>
 							<FormField
 								control={form.control}
-								name="paymentMethod"
+								name="paymentMethodId"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Payment Method</FormLabel>
