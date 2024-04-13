@@ -1,75 +1,76 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-export async function GET(req: Request) {
-    // write the get request to get all categories here
+
+export async function GET(req:Request){
     const session = await getSession();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" });
     }
     try {
-        const categories = await prisma.category.findMany({
+        const charts = await prisma.chart.findMany({
             where: {
                 userId: session.user.id,
             },
         });
-        return NextResponse.json({ result: categories, status: "success" });
+        return NextResponse.json({ result: charts, status: "success" });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" });
     }
 }
-export async function POST(req: Request) {
-    // write the post request to create a category here
+export async function POST(req: Request){
     const session = await getSession();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" });
     }
     try {
-        const { name } = await req.json();
-        const category = await prisma.category.create({
+        const { name, type, description } = await req.json();
+        const chart = await prisma.chart.create({
             data: {
                 name,
                 userId: session.user.id,
+                type,
+                description,
             },
         });
-        return NextResponse.json({ result: category, status: "success" });
+        return NextResponse.json({ result: chart, status: "success" });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" });
     }
 }
-export async function PUT(req: Request) {
-    // write the put request to update a category here
+export async function PUT(req: Request){
     const session = await getSession();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" });
     }
     try {
-        const { id, name } = await req.json();
-        const category = await prisma.category.update({
+        const { id, name, type, description } = await req.json();
+        const chart = await prisma.chart.update({
             where: {
                 id,
             },
             data: {
                 name,
+                type,
+                description,
             },
         });
-        return NextResponse.json({ result: category, status: "success" });
+        return NextResponse.json({ result: chart, status: "success" });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" });
     }
 }
-export async function DELETE(req: Request) {
-    // write the delete request to delete a category here
+export async function DELETE(req: Request){
     const session = await getSession();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" });
     }
     try {
         const { id } = await req.json();
-        await prisma.category.delete({
+        await prisma.chart.delete({
             where: {
                 id,
             },
