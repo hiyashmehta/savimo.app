@@ -56,7 +56,7 @@ export default function AddTransaction() {
             title: "",
             amount: 0,
             paymentMethodId: "",
-            // date: new Date(),
+            date: new Date(),
             description: "",
             type: "expense",
         },
@@ -78,7 +78,7 @@ export default function AddTransaction() {
             // form.resetField("title");
             // form.resetField("amount");
             // form.resetField("description");
-            form.reset()
+            form.reset();
             // form.setValue(
             //     "date",
             //     addDays(new Date(variables.data.date), parseInt('1')),
@@ -96,8 +96,8 @@ export default function AddTransaction() {
         return (
             <Dialog open={open} onOpenChange={() => setOpen(!open)}>
                 <Button onClick={() => setOpen(true)}>Add Transaction</Button>
-                <DialogContent>
-                    <h1 className="text-xl font-medium">
+                <DialogContent className="min-w-3xl w-[800px] max-w-3xl">
+                    <h1 className="text-3xl font-semibold">
                         Add Transaction
                         {isPending && (
                             <span className="text-muted-foreground">
@@ -111,59 +111,141 @@ export default function AddTransaction() {
                             onSubmit={form.handleSubmit(onSubmit)}
                             className="w-full space-y-6"
                         >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Title</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Title"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is the title of transaction
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="amount"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Amount</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="0"
-                                                type="number"
-                                                value={Number(field.value)}
-                                                onChange={(event) =>
-                                                    field.onChange(
-                                                        Number(
-                                                            event.target.value,
-                                                        ),
-                                                    )
-                                                }
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Title</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Title"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the title of transaction
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="amount"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Amount</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="0"
+                                                    type="number"
+                                                    value={Number(field.value)}
+                                                    onChange={(event) =>
+                                                        field.onChange(
+                                                            Number(
+                                                                event.target
+                                                                    .value,
+                                                            ),
+                                                        )
+                                                    }
 
-                                                // onChange={field.onChange}
-                                                // {...field}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is the amount of your
-                                            transaction.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />{" "}
-                            <Button type="submit" disabled={isPending}>
-                                Save
-                            </Button>
+                                                    // onChange={field.onChange}
+                                                    // {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the amount of your
+                                                transaction.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />{" "}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="paymentMethodId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Payment Method
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    // defaultValue={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select the payment method" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {paymentMethods.map(
+                                                            (item: any) => (
+                                                                <SelectItem
+                                                                    value={
+                                                                        item?.id
+                                                                    }
+                                                                    key={
+                                                                        item?.id
+                                                                    }
+                                                                >
+                                                                    {item?.name}
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the name of your payment
+                                                method.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="type"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Transaction Type
+                                            </FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select the transaction type" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="expense">
+                                                        Expense
+                                                    </SelectItem>
+                                                    <SelectItem value="income">
+                                                        Income
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                This is the type of your
+                                                transaction.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />{" "}
+                            </div>
                             <FormField
                                 control={form.control}
                                 name="date"
@@ -268,44 +350,7 @@ export default function AddTransaction() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="paymentMethodId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Payment Method</FormLabel>
-                                        <FormControl>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                // defaultValue={field.value}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select the payment method" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {paymentMethods.map(
-                                                        (item: any) => (
-                                                            <SelectItem
-                                                                value={item?.id}
-                                                                key={item?.id}
-                                                            >
-                                                                {item?.name}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is the name of your payment
-                                            method.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -326,38 +371,23 @@ export default function AddTransaction() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="type"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Transaction Type</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select the transaction type" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="expense">
-                                                    Expense
-                                                </SelectItem>
-                                                <SelectItem value="income">
-                                                    Income
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormDescription>
-                                            This is the type of your
-                                            transaction.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="flex justify-end gap-4">
+                                <Button
+                                    variant={"outline"}
+                                    className="w-[200px]"
+                                    disabled={isPending}
+                                    onClick={() => setOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="w-[200px]"
+                                    disabled={isPending}
+                                >
+                                    Save
+                                </Button>
+                            </div>
                         </form>
                     </Form>
                 </DialogContent>

@@ -2,18 +2,14 @@
 import { AreaChartHero } from "@/components/charts/area-chart";
 import { BarChartHero } from "@/components/charts/bar-chart";
 import { LineChartHero } from "@/components/charts/line-chart";
-import AddPaymentMethod from "@/components/shared/dialogs/payment-method/add-payment-method";
-import AddTransaction from "@/components/shared/dialogs/transactions/add-transaction";
+import Navbar from "@/components/shared/navbar";
 import {
     Transaction,
     TransactionTable,
 } from "@/components/shared/tables/transaction-table";
-import { Button } from "@/components/ui/button";
 import { getTransactions } from "@/lib/actions/transactions";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { useQuery } from "@tanstack/react-query";
-import { signOut } from "next-auth/react";
-import Image from "next/image";
 import React from "react";
 
 export default function AppPage() {
@@ -57,21 +53,7 @@ export default function AppPage() {
     if (transactions)
         return (
             <div>
-                <div className="flex justify-between p-4">
-                    <h1>Welcome {user?.name}</h1>
-                    <p>Your email is {user?.email}</p>
-                    <Image
-                        src={user?.image ?? "/profile.png"}
-                        alt="Profile picture"
-                        width={100}
-                        height={100}
-                        unoptimized
-                        className="h-10 w-10 rounded-full"
-                    />
-                    <Button onClick={() => signOut()}>Sign out</Button>
-                    <AddPaymentMethod />
-                    <AddTransaction />
-                </div>
+                <Navbar />
                 <div className="p-4">
                     <div className="grid grid-cols-2 gap-4">
                         <AreaChartHero data={filteredTransactions} />
